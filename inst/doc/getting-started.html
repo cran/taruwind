@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TaruWind 0.1.0 — A first wind-downscaling workflow in Istanbul</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+    body {
+      box-sizing: border-box;
+      max-width: 62rem;
+      padding-left: clamp(1rem, 4vw, 3rem);
+      padding-right: clamp(1rem, 4vw, 3rem);
+    }
+    div.sourceCode {
+      position: relative;
+      max-width: 100%;
+      margin: 1.25rem 0;
+      overflow: hidden;
+      border: 1px solid #d5dce5;
+      border-radius: 0.5rem;
+      background: #f6f8fb;
+    }
+    div.sourceCode pre.sourceCode {
+      box-sizing: border-box;
+      max-width: 100%;
+      margin: 0;
+      padding: 2.8rem 1rem 1rem;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.5;
+    }
+    div.sourceCode pre.sourceCode code.sourceCode,
+    div.sourceCode pre.sourceCode code.sourceCode span {
+      white-space: inherit;
+      overflow-wrap: anywhere;
+    }
+    button.copy-code {
+      position: absolute;
+      top: 0.55rem;
+      right: 0.65rem;
+      z-index: 2;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid #45698c;
+      border-radius: 0.35rem;
+      background: #ffffff;
+      color: #173b5d;
+      font: 600 0.8rem system-ui, sans-serif;
+      cursor: pointer;
+    }
+    button.copy-code:hover,
+    button.copy-code:focus-visible {
+      background: #e5f1fb;
+      outline-color: #173b5d;
+    }
+    @media print {
+      button.copy-code { display: none; }
+      div.sourceCode { border-color: #bfc6cd; }
+    }
+  </style>
+  <script>
+    (function () {
+      function fallbackCopy(value) {
+        var field = document.createElement("textarea");
+        field.value = value;
+        field.setAttribute("readonly", "");
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.focus();
+        field.select();
+        var copied = document.execCommand("copy");
+        field.remove();
+        return copied;
+      }
+
+      async function copyCode(value) {
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(value);
+            return true;
+          } catch (error) {
+            // A locally opened HTML file may require the older clipboard route.
+          }
+        }
+        return fallbackCopy(value);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("div.sourceCode > pre > code").forEach(function (code) {
+          var wrapper = code.parentElement.parentElement;
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "copy-code";
+          button.textContent = "Copy code";
+          button.setAttribute("aria-label", "Copy this code block");
+          button.addEventListener("click", async function () {
+            var copied = await copyCode(code.textContent);
+            button.textContent = copied ? "Copied!" : "Copy failed";
+            window.setTimeout(function () { button.textContent = "Copy code"; }, 1800);
+          });
+          wrapper.appendChild(button);
+        });
+      });
+    })();
+  </script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TaruWind 0.1.0 — A first wind-downscaling workflow in
+Istanbul</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#the-story-one-location-from-coordinates-to-reusable-predictions"
+id="toc-the-story-one-location-from-coordinates-to-reusable-predictions">The
+story: one location, from coordinates to reusable predictions</a></li>
+<li><a href="#prepare-r-and-data-access"
+id="toc-prepare-r-and-data-access">1. Prepare R and data access</a>
+<ul>
+<li><a href="#cds-access" id="toc-cds-access">CDS access</a></li>
+</ul></li>
+<li><a href="#define-our-istanbul-site-and-period"
+id="toc-define-our-istanbul-site-and-period">2. Define our Istanbul site
+and period</a></li>
+<li><a href="#obtain-the-first-three-hours-at-our-site"
+id="toc-obtain-the-first-three-hours-at-our-site">3. Obtain the first
+three hours at our site</a></li>
+<li><a href="#follow-what-happened-during-that-call"
+id="toc-follow-what-happened-during-that-call">4. Follow what happened
+during that call</a>
+<ul>
+<li><a href="#progress-and-downloaded-files"
+id="toc-progress-and-downloaded-files">Progress and downloaded
+files</a></li>
+</ul></li>
+<li><a href="#inspect-and-plot-our-first-result"
+id="toc-inspect-and-plot-our-first-result">5. Inspect and plot our first
+result</a>
+<ul>
+<li><a href="#retrieve-the-four-era5-input-nodes-for-these-same-hours"
+id="toc-retrieve-the-four-era5-input-nodes-for-these-same-hours">Retrieve
+the four ERA5 input nodes for these same hours</a></li>
+</ul></li>
+<li><a href="#save-our-result-and-predict-the-following-day"
+id="toc-save-our-result-and-predict-the-following-day">6. Save our
+result and predict the following day</a></li>
+<li><a href="#inspect-the-inputs-behind-this-same-prediction"
+id="toc-inspect-the-inputs-behind-this-same-prediction">7. Inspect the
+inputs behind this same prediction</a></li>
+<li><a href="#map-the-inputs-and-a-small-surrounding-area"
+id="toc-map-the-inputs-and-a-small-surrounding-area">8. Map the inputs
+and a small surrounding area</a></li>
+<li><a href="#optional-next-step-use-the-normal-terrain-domain"
+id="toc-optional-next-step-use-the-normal-terrain-domain">Optional next
+step: use the normal terrain domain</a>
+<ul>
+<li><a href="#multiple-sites-local-time-and-100-m-winds"
+id="toc-multiple-sites-local-time-and-100-m-winds">Multiple sites, local
+time and 100 m winds</a></li>
+</ul></li>
+<li><a href="#reference-supplying-your-own-inputs"
+id="toc-reference-supplying-your-own-inputs">Reference: supplying your
+own inputs</a>
+<ul>
+<li><a href="#supply-existing-files"
+id="toc-supply-existing-files">Supply existing files</a></li>
+</ul></li>
+<li><a href="#reference-assumptions-runtime-and-limits"
+id="toc-reference-assumptions-runtime-and-limits">Reference:
+assumptions, runtime and limits</a></li>
+<li><a href="#reference-troubleshooting"
+id="toc-reference-troubleshooting">Reference: troubleshooting</a></li>
+</ul>
+</nav>
+<h2
+id="the-story-one-location-from-coordinates-to-reusable-predictions">The
+story: one location, from coordinates to reusable predictions</h2>
+<p>You do not need to learn every function. <strong>Start with
+<code>taruwind_downscale()</code> when you have coordinates and a
+period.</strong> It combines data acquisition, raster preparation and
+the current solver. No target observations are required.</p>
+<p>Suppose you want a wind-speed series at <strong>29.02° E, 41.02° N in
+Istanbul</strong>. We will request the first three hours of 1 January
+2020, compare the resulting speeds, save our work and reuse the same
+terrain response for the following day. This is an illustrative
+coordinate, not a claim of an instrumented station.</p>
+<p><strong>Follow Sections 1–8 in order in the same R session.</strong>
+Each step uses objects created earlier. Installation commands are needed
+only once. The later reference sections explain extensions; they are not
+extra steps required to complete the example. No local NetCDF or raster
+files need to be prepared manually.</p>
+<h2 id="prepare-r-and-data-access">1. Prepare R and data access</h2>
+<p>Start with the software requirements, before defining a site or
+requesting data. In RStudio, select <strong>Session → Restart R</strong>
+(<code>Ctrl+Shift+F10</code>). Check which packages are already
+available; this downloads nothing:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>needed <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;taruwind&quot;</span>, <span class="st">&quot;terra&quot;</span>, <span class="st">&quot;ncdf4&quot;</span>, <span class="st">&quot;Rarr&quot;</span>, <span class="st">&quot;lutz&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setNames</span>(<span class="fu">vapply</span>(needed, requireNamespace, <span class="fu">logical</span>(<span class="dv">1</span>), <span class="at">quietly =</span> <span class="cn">TRUE</span>), needed)</span></code></pre></div>
+<p>Install missing dependencies as needed. <code>Rarr</code> is
+available through Bioconductor; <code>BiocManager</code> is only its
+installer:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cran_packages <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;terra&quot;</span>, <span class="st">&quot;ncdf4&quot;</span>, <span class="st">&quot;lutz&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>missing_cran <span class="ot">=</span> cran_packages[<span class="sc">!</span><span class="fu">vapply</span>(cran_packages, requireNamespace,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="fu">logical</span>(<span class="dv">1</span>), <span class="at">quietly =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_cran)) <span class="fu">install.packages</span>(missing_cran)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;Rarr&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;Rarr&quot;</span>, <span class="at">ask =</span> <span class="cn">FALSE</span>, <span class="at">update =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><code>terra</code>, <code>ncdf4</code> and <code>Rarr</code> support
+this automatic download workflow. <code>lutz</code> is needed only if
+you later request automatic local time zones. TaruWind is not yet on
+CRAN; use its locally installed package rather than
+<code>install.packages("taruwind")</code>.</p>
+<p>Now load the package and confirm which local version R is using:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(taruwind)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">&quot;taruwind&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">find.package</span>(<span class="st">&quot;taruwind&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>?taruwind</span></code></pre></div>
+<p>The package version shown here should be 0.1.0 for this guide.</p>
+<h3 id="cds-access">CDS access</h3>
+<p>Follow the <a
+href="https://cds.climate.copernicus.eu/how-to-api">official CDS API
+setup instructions</a>. The package can read <code>~/.cdsapirc</code> or
+the <code>CDSAPIKEY</code> / <code>CDS_API_KEY</code> environment
+variable. Accept the applicable terms for the ERA5 single-level and
+monthly-mean datasets in your CDS account.</p>
+<p>Existing credentials may already be sufficient. <strong>Do not put
+your API key in scripts, GitHub or chat messages.</strong> DEM and
+WorldCover downloads do not require a CDS key. The package does not
+require Python.</p>
+<p>For the workflow below, these are the inputs and their sources:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Input</th>
+<th>What the package does</th>
+<th>What you provide</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Location and time</td>
+<td>Selects the target and hours</td>
+<td>Longitude/latitude in decimal degrees and a UTC period</td>
+</tr>
+<tr class="even">
+<td>ERA5</td>
+<td>Downloads wind from the four surrounding nodes</td>
+<td>CDS account and API key</td>
+</tr>
+<tr class="odd">
+<td>DEM</td>
+<td>Downloads GLO-90 and projects it onto a metric grid</td>
+<td>Optionally, your own DEM raster</td>
+</tr>
+<tr class="even">
+<td>Target roughness</td>
+<td>Converts WorldCover classes to z₀</td>
+<td><code>roughness = "worldcover"</code> or a prepared z₀ raster</td>
+</tr>
+<tr class="odd">
+<td>Source profile</td>
+<td>Retrieves reference FSR and applies the model convention</td>
+<td>Optionally, explicit <code>source_z0</code></td>
+</tr>
+<tr class="even">
+<td>Neutral depth</td>
+<td>Calculates a latitude-dependent depth</td>
+<td>Optionally, explicit <code>depth</code></td>
+</tr>
+</tbody>
+</table>
+<p>DEM values represent <strong>terrain elevation in metres</strong>.
+Roughness values represent <strong>aerodynamic z₀ in metres</strong>,
+not land-cover class identifiers.</p>
+<h2 id="define-our-istanbul-site-and-period">2. Define our Istanbul site
+and period</h2>
+<p>With the R packages and CDS access ready, define the location and
+requested hours once. All later steps use these same objects. Times are
+UTC and both endpoints are included: this request contains
+<strong>three</strong>, not two, hourly records.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>site <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">site_id =</span> <span class="st">&quot;istanbul_example&quot;</span>, <span class="at">lon =</span> <span class="fl">29.02</span>, <span class="at">lat =</span> <span class="fl">41.02</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>start_utc <span class="ot">=</span> <span class="st">&quot;2020-01-01 00:00:00&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>end_utc <span class="ot">=</span> <span class="st">&quot;2020-01-01 02:00:00&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>cache <span class="ot">=</span> <span class="fu">file.path</span>(tools<span class="sc">::</span><span class="fu">R_user_dir</span>(<span class="st">&quot;taruwind&quot;</span>, <span class="st">&quot;cache&quot;</span>), <span class="st">&quot;first-example&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>output_dir <span class="ot">=</span> <span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">&quot;taruwind-istanbul-example&quot;</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(output_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p><code>cache</code> holds reusable downloaded inputs;
+<code>output_dir</code> will hold our saved results. Print either
+variable to see its full path. No files are deleted by this example.</p>
+<h2 id="obtain-the-first-three-hours-at-our-site">3. Obtain the first
+three hours at our site</h2>
+<p>This example uses a terrain domain approximately 1 km wide.
+<strong>The 990 m domain is only an installation/integration check, not
+the normal study domain.</strong></p>
+<p>By default, downloaded files are cached in the current R session’s
+temporary directory. The example below explicitly chooses a persistent
+user cache so downloads and queued CDS requests can be reused after
+restarting R.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wind <span class="ot">=</span> <span class="fu">taruwind_downscale</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">sites =</span> site,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> start_utc, <span class="at">end =</span> end_utc,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">roughness =</span> <span class="st">&quot;worldcover&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">domain_m =</span> <span class="dv">990</span>, <span class="at">resolution =</span> <span class="dv">90</span>, <span class="at">workers =</span> <span class="dv">1</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache_dir =</span> cache</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>wind[, <span class="fu">c</span>(<span class="st">&quot;timestamp_utc&quot;</span>, <span class="st">&quot;wind_speed&quot;</span>, <span class="st">&quot;taruwind_speed&quot;</span>)]</span></code></pre></div>
+<p><code>wind</code> is a <strong>tibble</strong>, which is also an R
+data frame. Each printed row is one target and one hour. It additionally
+carries a prepared terrain response and forcing provenance as
+attributes; these do not appear among the printed columns. Section 5
+shows exactly how to inspect them.</p>
+<p>The first call includes network access and potentially a CDS queue,
+so its elapsed time is not just solver time. Requesting three hours does
+not necessarily mean downloading a three-hour-sized file: provider
+chunks may be larger.</p>
+<p>If you receive <strong>“CDS source-profile job is still
+queued/running”</strong>, repeat the same call later with <strong>the
+same cache directory</strong>. The saved job identifier allows the
+request to resume rather than submitting another job. Do not keep
+clearing the cache and starting over.</p>
+<p>For a normal site analysis, remove <code>domain_m = 990</code>: the
+default domain is approximately <strong>30 × 30 km</strong>, with
+<strong>90 m</strong> metric cells. This requires more computation;
+initial preparation at complex sites can take several minutes.
+<strong>Shortening the period does not shrink the terrain
+solve.</strong> A 30 km domain is not a universal guarantee of adequacy
+for every landscape.</p>
+<h2 id="follow-what-happened-during-that-call">4. Follow what happened
+during that call</h2>
+<h3 id="progress-and-downloaded-files">Progress and downloaded
+files</h3>
+<p>The console reports six stages: ERA5-hour availability, source
+profile, terrain/roughness preparation, response construction, ERA5
+acquisition and response application. These are stage counters, not
+percentages of elapsed time. Use <code>quiet = TRUE</code> in
+<code>taruwind_downscale()</code> to suppress these messages. Warnings
+and errors remain.</p>
+<p>ERA5 winds are read from Zarr, not downloaded as GRIB. The messages
+distinguish coordinate arrays from wind chunks and report cache reuse. A
+stored wind chunk can cover many more hours than requested; only the
+requested hours enter the output. <code>Rarr</code> reads these
+compressed arrays; <code>BiocManager</code> is only its installer.
+Neither is needed when applying the solver to your own wind
+components.</p>
+<p>Inspect the example cache without deleting anything:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cache_info <span class="ot">=</span> <span class="fu">taruwind_cache_info</span>(cache)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cache_info</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(cache_info, <span class="st">&quot;total_bytes&quot;</span>) <span class="sc">/</span> <span class="fl">1e6</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(cache_info, <span class="st">&quot;cache_dir&quot;</span>)</span></code></pre></div>
+<p>The divided total is in megabytes; the cache directory is the path
+used above.</p>
+<p>An explicit persistent cache is retained after the call and after R
+restarts. The default session-temporary cache is normally removed when R
+closes, not when the function returns. The package does not
+automatically evict persistent files. Reusing cached data does not
+itself reuse the terrain solve; save and pass <code>responses</code> as
+shown below to avoid reconstructing that response.</p>
+<p>DEM acquisition currently caches complete GLO-90 tiles. WorldCover
+acquisition reads raster windows. A short wind period does not reduce
+these static inputs.</p>
+<h2 id="inspect-and-plot-our-first-result">5. Inspect and plot our first
+result</h2>
+<p>The <code>wind</code> tibble now contains our three Istanbul records.
+The two speed columns are the input baseline and the model output, not
+two observation series.</p>
+<p>Inspect the object in layers, without printing its potentially large
+stored response:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(wind)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(wind)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(wind)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">attributes</span>(wind))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">attr</span>(wind, <span class="st">&quot;responses&quot;</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>prepared <span class="ot">=</span> <span class="fu">attr</span>(wind, <span class="st">&quot;responses&quot;</span>)[[site<span class="sc">$</span>site_id]]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(prepared)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(prepared)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(prepared<span class="sc">$</span>provenance)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(wind, <span class="st">&quot;responses&quot;</span>)[[site<span class="sc">$</span>site_id]]<span class="sc">$</span>provenance<span class="sc">$</span>geographic<span class="sc">$</span>actual_domain_m</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(wind, <span class="st">&quot;forcing_provenance&quot;</span>)</span></code></pre></div>
+<p><code>class(wind)</code> includes <code>tbl_df</code> and
+<code>data.frame</code>. <code>names(wind)</code> lists the ordinary
+data columns below. <code>names(attributes(wind))</code> also lists
+standard R data-frame attributes such as <code>names</code>,
+<code>row.names</code> and <code>class</code>. The current workflow
+carries these additional attributes:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Attribute</th>
+<th>What it contains</th>
+<th>Why keep it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>responses</code></td>
+<td>A named list with one prepared terrain response per site</td>
+<td>Reuse it for later hours without rebuilding that site’s terrain
+response</td>
+</tr>
+<tr class="even">
+<td><code>forcing_provenance</code></td>
+<td>Source, retrieval and interpolation metadata for ERA5</td>
+<td>Record which forcing produced the rows</td>
+</tr>
+<tr class="odd">
+<td><code>sites</code>, <code>source</code>, <code>license</code>,
+<code>citation</code>, <code>retrieved_utc</code>,
+<code>wind_height_m</code>, <code>component_variables</code>,
+<code>interpolation</code>, <code>cache_dir</code></td>
+<td>Metadata forwarded from the ERA5 download result</td>
+<td>Inspect the target and downloaded forcing</td>
+</tr>
+</tbody>
+</table>
+<p><code>prepared</code> is one <code>taruwind_modal_response</code>
+object. Its <code>matrix</code>, <code>surface</code>,
+<code>residual</code>, <code>iterations</code> and
+<code>provenance</code> components describe the reusable response; it is
+not another hourly data frame. For this quick check,
+<code>actual_domain_m</code> is 990 m. To discover a result’s contents
+in R, start with <code>class()</code>, <code>names()</code> and
+<code>names(attributes())</code>; <code>?taruwind_downscale</code>
+documents the return value. An RDS file preserves both the columns and
+these attributes; CSV preserves only the columns. The result does not
+embed complete DEM or roughness rasters or all four raw ERA5 node
+series. The source files remain in the cache; Sections 5 and 8 show how
+to retrieve the nodes and aligned maps.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>site_id</code>, <code>lon</code>, <code>lat</code></td>
+<td>Target identifier and coordinates</td>
+</tr>
+<tr class="even">
+<td><code>timestamp_utc</code></td>
+<td>UTC timestamp</td>
+</tr>
+<tr class="odd">
+<td><code>wind_height_m</code></td>
+<td>Requested height: 10 or 100 m</td>
+</tr>
+<tr class="even">
+<td><code>u</code>, <code>v</code></td>
+<td>ERA5 input components interpolated to the target using vector
+bilinear interpolation</td>
+</tr>
+<tr class="odd">
+<td><code>wind_speed</code></td>
+<td>ERA5 vector-bilinear speed, m/s</td>
+</tr>
+<tr class="even">
+<td><code>taruwind_speed</code></td>
+<td>Final TaruWind speed estimate, m/s</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>u10</code>/<code>v10</code> or
+<code>u100</code>/<code>v100</code> columns are also
+<strong>input</strong> components, not downscaled output components.
+This version returns speed as its final product. At 10 m,
+<code>u10</code> equals <code>u</code> and <code>v10</code> equals
+<code>v</code>: these are height-specific aliases, not additional
+predictions or surrounding grid values. To inspect a compact view
+without removing attributes from the original object:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wind_view <span class="ot">=</span> wind[, <span class="fu">c</span>(<span class="st">&quot;site_id&quot;</span>, <span class="st">&quot;timestamp_utc&quot;</span>, <span class="st">&quot;wind_height_m&quot;</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                     <span class="st">&quot;u&quot;</span>, <span class="st">&quot;v&quot;</span>, <span class="st">&quot;wind_speed&quot;</span>, <span class="st">&quot;taruwind_speed&quot;</span>)]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>wind_view</span></code></pre></div>
+<p>Specifically, <code>wind_speed = sqrt(u^2 + v^2)</code>
+<strong>after</strong> interpolating the components. It is
+vector-bilinear speed, not scalar interpolation of the four node speeds.
+<code>taruwind_speed</code> is the final model estimate.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>wind<span class="sc">$</span>increment <span class="ot">=</span> wind<span class="sc">$</span>taruwind_speed <span class="sc">-</span> wind<span class="sc">$</span>wind_speed</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wind<span class="sc">$</span>timestamp_utc, wind<span class="sc">$</span>wind_speed, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">col =</span> <span class="st">&quot;#0072B2&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;UTC&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Wind speed (m/s)&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(wind<span class="sc">$</span>wind_speed, wind<span class="sc">$</span>taruwind_speed), <span class="at">finite =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(wind<span class="sc">$</span>timestamp_utc, wind<span class="sc">$</span>taruwind_speed, <span class="at">col =</span> <span class="st">&quot;#D55E00&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;ERA5 Bilinear&quot;</span>, <span class="st">&quot;TaruWind&quot;</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;#0072B2&quot;</span>, <span class="st">&quot;#D55E00&quot;</span>), <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>)</span></code></pre></div>
+<p>This uses ordinary R graphics, not a special TaruWind plotting
+function. In RStudio the figure appears in the Plots pane. It is a short
+demonstration, not a climatology. You can use the same tibble with
+ggplot2 for longer series.</p>
+<p>A difference between models is not itself an accuracy gain.
+Independent observations are needed to assess accuracy.</p>
+<h3
+id="retrieve-the-four-era5-input-nodes-for-these-same-hours">Retrieve
+the four ERA5 input nodes for these same hours</h3>
+<p>The downloaded data are not limited to the target prediction. The
+ERA5 helper can return each surrounding node’s wind components, speed,
+coordinates and interpolation weight. Reuse the
+<strong><code>era5</code> subdirectory</strong> of our existing
+cache:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>era5 <span class="ot">=</span> <span class="fu">taruwind_download_era5</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">sites =</span> site, <span class="at">start =</span> start_utc, <span class="at">end =</span> end_utc, <span class="at">wind_height =</span> <span class="dv">10</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">include_nodes =</span> <span class="cn">TRUE</span>, <span class="at">cache_dir =</span> <span class="fu">file.path</span>(cache, <span class="st">&quot;era5&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>nodes <span class="ot">=</span> <span class="fu">attr</span>(era5, <span class="st">&quot;nodes&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>nodes[, <span class="fu">c</span>(<span class="st">&quot;site_id&quot;</span>, <span class="st">&quot;timestamp_utc&quot;</span>, <span class="st">&quot;node&quot;</span>, <span class="st">&quot;node_lon&quot;</span>, <span class="st">&quot;node_lat&quot;</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;weight&quot;</span>, <span class="st">&quot;u&quot;</span>, <span class="st">&quot;v&quot;</span>, <span class="st">&quot;wind_speed&quot;</span>)]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(era5, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;era5-with-nodes.rds&quot;</span>))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">as.data.frame</span>(nodes), <span class="fu">file.path</span>(output_dir, <span class="st">&quot;era5-four-nodes.csv&quot;</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>For this example there are 12 rows: four nodes for each of three
+hours. These are native ERA5 grid values exposed by the data store,
+before our interpolation or terrain correction. Cached historical wind
+chunks are reused; metadata may still be checked. <code>wind</code>
+itself does not request these raw series: <code>include_nodes</code>
+currently belongs to <code>taruwind_download_era5()</code>, not
+<code>taruwind_downscale()</code>. RDS preserves the node attribute;
+exporting only the main <code>era5</code> tibble to CSV would omit it,
+hence the separate node CSV above.</p>
+<h2 id="save-our-result-and-predict-the-following-day">6. Save our
+result and predict the following day</h2>
+<p>We now retain both the output and the terrain response built for this
+exact location. The response can be applied to new hours without solving
+the same terrain again. Download caching alone would not achieve
+this.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>responses <span class="ot">=</span> <span class="fu">attr</span>(wind, <span class="st">&quot;responses&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(responses, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;responses.rds&quot;</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wind, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;first-three-hours.rds&quot;</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">as.data.frame</span>(wind), <span class="fu">file.path</span>(output_dir, <span class="st">&quot;first-three-hours.csv&quot;</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>later <span class="ot">=</span> <span class="fu">taruwind_downscale</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">sites =</span> site,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">period =</span> <span class="fu">c</span>(<span class="st">&quot;2020-01-02&quot;</span>, <span class="st">&quot;2020-01-02&quot;</span>),</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">responses =</span> responses, <span class="at">cache_dir =</span> cache</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(later)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(later, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;following-day.rds&quot;</span>))</span></code></pre></div>
+<p>Identical start/end dates select all 24 hours of that UTC day;
+endpoints are inclusive. This reused response still belongs to the
+<strong>990 m test domain</strong>. Reusing it does not enlarge the
+domain. Build a new response for a normal 30 km analysis.</p>
+<p>In another session, recreate <code>site</code>, <code>cache</code>
+and <code>output_dir</code> from Step 2, then load
+<code>responses = readRDS(file.path(output_dir, "responses.rds"))</code>
+before running the <code>later</code> call. CSV does not preserve
+model/provenance attributes; use RDS for that purpose.</p>
+<p>Rebuild whenever you change the DEM, roughness, resolution, domain,
+coordinates, height or source profile. Supplying new raster arguments
+alongside <code>responses</code> does not update the saved response.</p>
+<h2 id="inspect-the-inputs-behind-this-same-prediction">7. Inspect the
+inputs behind this same prediction</h2>
+<p>Our first workflow is complete. If you want to understand its
+source-profile inputs, inspect the cached profile for the <strong>same
+Istanbul coordinate</strong>. This does not require a file called
+<code>my-era5-fsr.nc</code> or a second manual setup.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>profile <span class="ot">=</span> <span class="fu">taruwind_source_profile</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lon =</span> site<span class="sc">$</span>lon, <span class="at">lat =</span> site<span class="sc">$</span>lat,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache_dir =</span> <span class="fu">file.path</span>(cache, <span class="st">&quot;source_profile&quot;</span>), <span class="at">quiet =</span> <span class="cn">FALSE</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>profile<span class="sc">$</span>source_z0</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>profile<span class="sc">$</span>depth</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>responses[[<span class="dv">1</span>]]<span class="sc">$</span>provenance</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(wind, <span class="st">&quot;forcing_provenance&quot;</span>)</span></code></pre></div>
+<p>These describe the inputs and response that generated our result.
+They are not instructions to fit a new model to observations. The
+source-reference convention is described under Assumptions below.</p>
+<h2 id="map-the-inputs-and-a-small-surrounding-area">8. Map the inputs
+and a small surrounding area</h2>
+<p>First, look at the <strong>same elevation and roughness
+layers</strong> used when preparing our Istanbul response.
+<code>taruwind_site_layers()</code> uses the same alignment routine as
+the solver. It reuses downloaded tiles in our cache and does not acquire
+wind. The two layers are metres of elevation and metres of aerodynamic
+roughness length, respectively.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>input_maps <span class="ot">=</span> <span class="fu">taruwind_site_layers</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lon =</span> site<span class="sc">$</span>lon, <span class="at">lat =</span> site<span class="sc">$</span>lat, <span class="at">roughness =</span> <span class="st">&quot;worldcover&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">domain_m =</span> <span class="dv">990</span>, <span class="at">resolution =</span> <span class="dv">90</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache_dir =</span> <span class="fu">file.path</span>(cache, <span class="st">&quot;dem&quot;</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(input_maps)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">taruwind_plot_map</span>(input_maps, <span class="at">layer =</span> <span class="fu">c</span>(<span class="st">&quot;elevation_m&quot;</span>, <span class="st">&quot;roughness_m&quot;</span>))</span></code></pre></div>
+<p>Now extend the example from one target to a <strong>3 × 3 output
+grid</strong> around it. <code>map_resolution = 500</code> is the
+output-cell spacing; <code>resolution = 90</code> remains the terrain
+calculation spacing. The requested 990 m square rounds to an actual
+1,500 m square so the centre itself is an output cell. Every output cell
+has its own local terrain response. The nine cells therefore require
+more work than the original point call, even though the ERA5 input hours
+and the source files are cached.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>area <span class="ot">=</span> <span class="fu">taruwind_downscale_area</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lon =</span> site<span class="sc">$</span>lon, <span class="at">lat =</span> site<span class="sc">$</span>lat,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> start_utc, <span class="at">end =</span> end_utc,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">roughness =</span> <span class="st">&quot;worldcover&quot;</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">area_m =</span> <span class="dv">990</span>, <span class="at">map_resolution =</span> <span class="dv">500</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">domain_m =</span> <span class="dv">990</span>, <span class="at">resolution =</span> <span class="dv">90</span>, <span class="at">workers =</span> <span class="dv">1</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache_dir =</span> cache</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(area<span class="sc">$</span>maps)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>area<span class="sc">$</span>grid<span class="sc">$</span>actual_area_m</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">taruwind_plot_map</span>(area<span class="sc">$</span>maps, <span class="at">layer =</span> <span class="st">&quot;taruwind_20200101T000000Z&quot;</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">taruwind_plot_map</span>(area<span class="sc">$</span>maps, <span class="at">layer =</span> <span class="st">&quot;bilinear_20200101T000000Z&quot;</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(area, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;three-by-three-area.rds&quot;</span>))</span></code></pre></div>
+<p><code>area$wind</code> contains the underlying site-hour tibble and
+<code>area$maps</code> contains one TaruWind and one vector-bilinear
+ERA5 raster per hour. Inspect <code>area$grid$sites</code> for the exact
+output coordinates. The map is a grid of independently computed point
+estimates, not a single shared-domain flow solve. Unlike
+<code>wind</code>, <strong><code>area</code> is a list</strong>, so
+inspect its named components with <code>names(area)</code>. Its
+<code>wind</code> component is a tibble, its <code>maps</code> component
+is a <code>terra::SpatRaster</code>, and its <code>grid</code> component
+describes cell locations and resolution:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(area)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(area)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(area<span class="sc">$</span>wind)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(area<span class="sc">$</span>maps)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>area<span class="sc">$</span>grid<span class="sc">$</span>sites</span></code></pre></div>
+<p>The 990 m terrain domains and nine coarse map cells demonstrate the
+software; use an appropriate terrain domain and output spacing for an
+analysis. The function defaults to at most 25 output cells and permits
+at most 100 by explicitly raising <code>max_cells</code>; work scales
+with the number of cells. An area call is also limited to 168 hourly
+timestamps (seven days). For the next period, reuse the nine prepared
+responses instead of solving terrain again:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>area_next <span class="ot">=</span> <span class="fu">taruwind_downscale_area</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lon =</span> site<span class="sc">$</span>lon, <span class="at">lat =</span> site<span class="sc">$</span>lat,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="st">&quot;2020-01-01 03:00:00&quot;</span>, <span class="at">end =</span> <span class="st">&quot;2020-01-01 05:00:00&quot;</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">area_m =</span> <span class="dv">990</span>, <span class="at">map_resolution =</span> <span class="dv">500</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">domain_m =</span> <span class="dv">990</span>, <span class="at">resolution =</span> <span class="dv">90</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">responses =</span> <span class="fu">attr</span>(area<span class="sc">$</span>wind, <span class="st">&quot;responses&quot;</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache_dir =</span> cache</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>You can export a raster with
+<code>terra::writeRaster(area$maps[[1]], filename)</code>. To save a PNG
+directly, supply a new filename to
+<code>taruwind_plot_map(..., file = "my-map.png")</code>; it will not
+overwrite an existing image.</p>
+<h2 id="optional-next-step-use-the-normal-terrain-domain">Optional next
+step: use the normal terrain domain</h2>
+<p>Before interpreting this site scientifically, build a response with
+the normal domain. This optional calculation uses the same site, hours
+and cache but <strong>constructs a new approximately 30 km terrain
+response</strong>. It can take substantially longer than the preceding
+steps.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>wind_30km <span class="ot">=</span> <span class="fu">taruwind_downscale</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">sites =</span> site, <span class="at">start =</span> start_utc, <span class="at">end =</span> end_utc,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">roughness =</span> <span class="st">&quot;worldcover&quot;</span>, <span class="at">domain_m =</span> <span class="dv">30000</span>, <span class="at">resolution =</span> <span class="dv">90</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">workers =</span> <span class="dv">1</span>, <span class="at">cache_dir =</span> cache</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(wind_30km)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>wind_30km[, <span class="fu">c</span>(<span class="st">&quot;timestamp_utc&quot;</span>, <span class="st">&quot;wind_speed&quot;</span>, <span class="st">&quot;taruwind_speed&quot;</span>)]</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(wind_30km, <span class="st">&quot;responses&quot;</span>)[[site<span class="sc">$</span>site_id]]<span class="sc">$</span>provenance<span class="sc">$</span>geographic<span class="sc">$</span>actual_domain_m</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wind_30km, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;normal-domain-result.rds&quot;</span>))</span></code></pre></div>
+<p><code>wind_30km</code> has the <strong>same tibble/data-frame
+structure</strong> as <code>wind</code>; the different variable name
+does not create another result type. Their ERA5 input hours and target
+are the same. The stored <code>responses</code> attribute shows which
+domain was used to construct each terrain response. Compare the two
+model series directly:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">timestamp_utc =</span> wind<span class="sc">$</span>timestamp_utc,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">quick_check_speed =</span> wind<span class="sc">$</span>taruwind_speed,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">normal_domain_speed =</span> wind_30km<span class="sc">$</span>taruwind_speed)</span></code></pre></div>
+<p>The earlier <code>wind</code> remains the 990 m software check;
+<code>wind_30km</code> is the separate normal-domain result. Saving
+either with <code>saveRDS()</code> keeps its columns and attributes for
+later inspection.</p>
+<h3 id="multiple-sites-local-time-and-100-m-winds">Multiple sites, local
+time and 100 m winds</h3>
+<p>Now suppose we also want a second location 0.02 degrees northeast of
+our first site. Keep the original identifier and add the second
+coordinate. This optional example keeps the same short period and small
+software-test domain:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sites <span class="ot">=</span> <span class="fu">rbind</span>(site, <span class="fu">data.frame</span>(<span class="at">site_id =</span> <span class="st">&quot;istanbul_neighbour&quot;</span>,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">lon =</span> site<span class="sc">$</span>lon <span class="sc">+</span> <span class="fl">0.02</span>, <span class="at">lat =</span> site<span class="sc">$</span>lat <span class="sc">+</span> <span class="fl">0.02</span>))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>network <span class="ot">=</span> <span class="fu">taruwind_downscale</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sites =</span> sites, <span class="at">start =</span> start_utc, <span class="at">end =</span> end_utc,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">domain_m =</span> <span class="dv">990</span>, <span class="at">resolution =</span> <span class="dv">90</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">roughness =</span> <span class="st">&quot;worldcover&quot;</span>, <span class="at">workers =</span> <span class="st">&quot;auto&quot;</span>, <span class="at">local_tz =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache_dir =</span> cache</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>network[, <span class="fu">c</span>(<span class="st">&quot;site_id&quot;</span>, <span class="st">&quot;timestamp_utc&quot;</span>, <span class="st">&quot;wind_speed&quot;</span>, <span class="st">&quot;taruwind_speed&quot;</span>)]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(network, <span class="fu">file.path</span>(output_dir, <span class="st">&quot;two-site-result.rds&quot;</span>))</span></code></pre></div>
+<p>Expect six rows: two sites times three hours. This constructs
+responses for both targets; it does not implicitly reuse the earlier
+<code>responses</code> object. For normal analysis use 30 km domains as
+above. A matrix with named <code>lon</code> and <code>lat</code> columns
+is also accepted. Keep <code>site_id</code> values unchanged when
+reusing responses.</p>
+<p><code>local_tz = TRUE</code> adds <code>time_zone</code> and
+<code>timestamp_local</code> while retaining UTC. <strong>The requested
+period is still interpreted in UTC</strong>, not local time.</p>
+<p>For 100 m winds, make a new call with <code>wind_height = 100</code>.
+Native ERA5 u100/v100 are retrieved, rather than extrapolating from 10
+m. Do not reuse a 10 m response at 100 m. Numerical support does not
+imply observational validation at 100 m in the accompanying study.</p>
+<h2 id="reference-supplying-your-own-inputs">Reference: supplying your
+own inputs</h2>
+<p><strong>The first-use workflow is already complete.</strong>
+<code>taruwind_downscale()</code> handles the source profile internally.
+Do not run a separate profile or raster setup unless you want to inspect
+inputs or supply your own data.</p>
+<h3 id="supply-existing-files">Supply existing files</h3>
+<p>If you already have a georeferenced DEM and an <strong>aerodynamic z₀
+raster in metres</strong>, pass those real raster objects or their real
+file paths as <code>dem</code> and <code>roughness</code> to
+<code>taruwind_downscale()</code>. It can still obtain the reference
+profile automatically. There are no placeholder files to copy or rename
+in this guide. See <code>?taruwind_prepare_site</code> for the
+lower-level input interface and <code>?taruwind_predict</code> for
+applying a prepared response to wind components.</p>
+<p>Rasters must cover the complete local domain. Convert CORINE class
+codes using an appropriate z₀ lookup before supplying them as roughness.
+Automatic CORINE downloading is not provided. WorldCover inputs do not
+reproduce the study’s CORINE-based experiment exactly.</p>
+<p><code>taruwind_build()</code> is the advanced metric-matrix
+interface: x/y are in metres, rows run south to north and columns west
+to east. Converting a terra raster directly to a matrix may reverse the
+required row order. The geographic interface handles this
+orientation.</p>
+<h2 id="reference-assumptions-runtime-and-limits">Reference:
+assumptions, runtime and limits</h2>
+<ul>
+<li>The model is a neutral diagnostic approach. Turbulence, thermal
+circulations and canopy displacement are not explicitly resolved.</li>
+<li>GLO-90 is projected onto a metric 90 m grid. DEM resolution, 10/100
+m wind height and 30 km domain width are separate quantities.</li>
+<li>WorldCover 2021 classes receive z₀ values from a documented lookup;
+these are not direct roughness measurements.</li>
+<li>The default source FSR reference year is 2021. It does not
+automatically follow the wind period; change it with
+<code>profile_year</code>. At 10 m, the effective source reference is
+bounded to 0.0002–0.03 m. This does not claim that actual ERA5 roughness
+is everywhere 0.03 m.</li>
+<li>Automatic neutral depth is not hourly boundary-layer height. The
+automatic profile path is restricted to absolute latitudes of 5–85
+degrees.</li>
+<li>Auto workers use half the logical cores, with a minimum of 1 and
+maximum of 16, further limited by the number of sites and memory guards.
+<strong>Sixteen workers do not split one site’s solve into sixteen
+parts.</strong> Data preparation is sequential; independent numerical
+solves run in parallel.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(wind, <span class="st">&quot;responses&quot;</span>)[[<span class="dv">1</span>]]<span class="sc">$</span>provenance</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(wind, <span class="st">&quot;forcing_provenance&quot;</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">taruwind_limits</span>()</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">taruwind_workers</span>(<span class="at">n_sites =</span> <span class="dv">10</span>)</span></code></pre></div>
+<p>The automatic point workflow allows up to ten calendar years per
+call, 100 sites and 10 million site-hours. Reflected solves are limited
+to 2 million computational cells per site and 60 million cells across a
+request. These cells include the solver’s reflected grid, not just the
+visible local square. The local-area workflow defaults to 25 output
+cells and permits at most 100 when <code>max_cells</code> is raised
+explicitly; its period is limited to 168 hourly timestamps (seven days).
+<code>allow_large</code> belongs to the separate ERA5 download helper,
+not the main <code>taruwind_downscale()</code> function. Split larger
+requests into batches.</p>
+<p>The site-hour limit still depends on the number of sites. Longer
+point series and area-map periods can be processed in consecutive
+batches with reusable responses. Requests before 1940, after the current
+UTC time, or outside the hours currently present in the CDS ARCO record
+stop with errors. The source commonly trails real time by several days,
+but no fixed lag is assumed: TaruWind checks the actual time axis before
+downloading terrain or requesting a source profile. By default, mutable
+metadata is refreshed once per day; use <code>refresh = "always"</code>
+to check the latest source state immediately. The package does not
+impose a network-byte quota or promise that a request below its safety
+limits will be fast or fit in memory.</p>
+<h2 id="reference-troubleshooting">Reference: troubleshooting</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Problem</th>
+<th>First check</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>An older version loads</td>
+<td>Restart R; inspect <code>find.package()</code> and
+<code>packageVersion()</code></td>
+</tr>
+<tr class="even">
+<td>CDS key / 403 error</td>
+<td>API configuration and acceptance of both datasets’ terms</td>
+</tr>
+<tr class="odd">
+<td>Queue timeout</td>
+<td>Retry later with the same call and cache directory</td>
+</tr>
+<tr class="even">
+<td>Requested ERA5 hour unavailable</td>
+<td>Inspect the available range in the error; use
+<code>refresh = "always"</code> if cached metadata may be stale</td>
+</tr>
+<tr class="odd">
+<td>Request exceeds site-hour or reflected-cell limits</td>
+<td>Reduce the period, site count or terrain domain; run recoverable
+batches</td>
+</tr>
+<tr class="even">
+<td>Missing R package</td>
+<td>Run the dependency check in Section 1</td>
+</tr>
+<tr class="odd">
+<td>Raster gaps / unknown class</td>
+<td>Check complete domain coverage; missing ocean cells are not
+automatically set to zero</td>
+</tr>
+<tr class="even">
+<td>Response coordinate/height mismatch</td>
+<td>Match the target, <code>site_id</code> and
+<code>wind_height</code></td>
+</tr>
+<tr class="odd">
+<td>Slow initial preparation</td>
+<td>Check terrain complexity and domain size; separate download
+time</td>
+</tr>
+<tr class="even">
+<td>NA output</td>
+<td>Check input u/v for missing values</td>
+</tr>
+</tbody>
+</table>
+<p>This version produces point wind-speed time series and bounded local
+raster maps, not national atlases, interactive maps, downscaled
+direction/u/v or CERRA downloads. Linux, Windows and macOS package
+checks passed in GitHub Actions run 35756209012 on 22 September 2026.
+Live data integration was additionally checked on Linux; the platform
+checks do not download environmental datasets.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>?taruwind_downscale</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>?taruwind_prepare_site</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>?taruwind_predict</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">help</span>(<span class="at">package =</span> <span class="st">&quot;taruwind&quot;</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">browseURL</span>(<span class="fu">system.file</span>(<span class="st">&quot;doc&quot;</span>, <span class="st">&quot;getting-started.html&quot;</span>, <span class="at">package =</span> <span class="st">&quot;taruwind&quot;</span>))</span></code></pre></div>
+<p>In short: <strong>start with one site, understand the output, save
+the response, then scale up.</strong></p>
+</body>
+</html>

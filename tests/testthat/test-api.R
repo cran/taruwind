@@ -1,0 +1,16 @@
+test_that("worker policy is portable and bounded", {
+  expect_equal(vapply(c(1,2,4,8,32,64),function(x)taruwind_workers(n_sites=100,cores=x),1L),c(1L,1L,2L,4L,16L,16L))
+  expect_equal(taruwind_workers(n_sites=1,cores=64),1L)
+  expect_error(taruwind_workers(17),"workers")
+})
+test_that("canonical API uses the current kernel and four-node vectors", {
+  h=matrix(0,5,5);q=list(dem=h,roughness=h+.03,dx=90,x0=0,y0=0,x=180,y=180,depth=900,source_z0=.03)
+  a=do.call(taruwind_build,q);expect_equal(a$provenance$formulation,"six-mode/exact-fetch-memory")
+  u=matrix(c(1,2,3,4,5,6,7,8),2,4);v=u/2;w=c(.1,.2,.3,.4)
+  expect_equal(taruwind_predict(a,u,v,w)$speed,sqrt(drop(u%*%w)^2+drop(v%*%w)^2),tolerance=1e-12)
+  expect_error(taruwind_predict(a,u,v,rep(1,4)),"weights")
+  expect_error(do.call(taruwind_build,c(q,list(max_cells=20))),"max_cells")
+  q$height=100;b=do.call(taruwind_build,q)
+  expect_equal(taruwind_predict(b,3,4)$speed,5,tolerance=1e-12)
+  expect_equal(length(taruwind_build_many(list(q,q),workers=1)),2)
+})

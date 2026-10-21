@@ -1,0 +1,55 @@
+Package: taruwind
+Type: Package
+Title: Reduced-Mode Terrain and Surface Wind Downscaling
+Version: 0.1.1
+Authors@R: c(
+    person("Cem", "Özen", role = c("aut", "cre"),
+        email = "ozenc@itu.edu.tr"),
+    person("Martin", "Reinecke", role = "ctb",
+        comment = "Author of bundled PocketFFT code"),
+    person("Peter", "Bell", role = c("ctb", "cph"),
+        comment = "Bundled PocketFFT code only"),
+    person("Matteo", "Frigo", role = c("ctb", "cph"),
+        comment = "Odd-sized DCT-IV code in bundled PocketFFT only"),
+    person("Tan Ping", "Liang", role = c("ctb", "cph"),
+        comment = "Size-search code in bundled PocketFFT only"),
+    person("Cris", "Luengo", role = c("ctb", "cph"),
+        comment = "Integer-overflow safeguards in bundled PocketFFT only"),
+    person("Max-Planck-Society", role = "cph",
+        comment = "Bundled PocketFFT code only"),
+    person("Massachusetts Institute of Technology", role = "cph",
+        comment = "Odd-sized DCT-IV code in bundled PocketFFT only")
+    )
+Description: Constructs reusable local wind responses using a neutral
+    terrain-following reduced-vertical-mode adjustment and exact raster-ray
+    integration of finite-fetch surface memory. Explicit metric-grid inputs
+    separate terrain, target aerodynamic roughness and the effective source
+    profile. Prepared responses can be applied to wind-component time series
+    without target-site wind calibration. This diagnostic approximation does
+    not resolve turbulence or guarantee conservation of the final field.
+License: MIT + file LICENSE
+Copyright: See inst/COPYRIGHTS for bundled third-party components.
+Encoding: UTF-8
+Depends: R (>= 4.2.0)
+Imports: Rcpp, tibble, curl, jsonlite, parallel
+LinkingTo: Rcpp
+Suggests: testthat (>= 3.0.0), terra, Rarr, lutz, ncdf4
+Config/testthat/edition: 3
+SystemRequirements: C++17
+NeedsCompilation: yes
+Config/roxygen2/version: 8.1.0
+Packaged: 2026-10-11 07:54:33 UTC; cemozen
+Author: Cem Özen [aut, cre],
+  Martin Reinecke [ctb] (Author of bundled PocketFFT code),
+  Peter Bell [ctb, cph] (Bundled PocketFFT code only),
+  Matteo Frigo [ctb, cph] (Odd-sized DCT-IV code in bundled PocketFFT
+    only),
+  Tan Ping Liang [ctb, cph] (Size-search code in bundled PocketFFT only),
+  Cris Luengo [ctb, cph] (Integer-overflow safeguards in bundled
+    PocketFFT only),
+  Max-Planck-Society [cph] (Bundled PocketFFT code only),
+  Massachusetts Institute of Technology [cph] (Odd-sized DCT-IV code in
+    bundled PocketFFT only)
+Maintainer: Cem Özen <ozenc@itu.edu.tr>
+Repository: CRAN
+Date/Publication: 2026-10-21 15:10:02 UTC

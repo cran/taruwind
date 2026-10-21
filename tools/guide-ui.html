@@ -1,0 +1,100 @@
+<style>
+  body {
+    box-sizing: border-box;
+    max-width: 62rem;
+    padding-left: clamp(1rem, 4vw, 3rem);
+    padding-right: clamp(1rem, 4vw, 3rem);
+  }
+  div.sourceCode {
+    position: relative;
+    max-width: 100%;
+    margin: 1.25rem 0;
+    overflow: hidden;
+    border: 1px solid #d5dce5;
+    border-radius: 0.5rem;
+    background: #f6f8fb;
+  }
+  div.sourceCode pre.sourceCode {
+    box-sizing: border-box;
+    max-width: 100%;
+    margin: 0;
+    padding: 2.8rem 1rem 1rem;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+  div.sourceCode pre.sourceCode code.sourceCode,
+  div.sourceCode pre.sourceCode code.sourceCode span {
+    white-space: inherit;
+    overflow-wrap: anywhere;
+  }
+  button.copy-code {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.65rem;
+    z-index: 2;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid #45698c;
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: #173b5d;
+    font: 600 0.8rem system-ui, sans-serif;
+    cursor: pointer;
+  }
+  button.copy-code:hover,
+  button.copy-code:focus-visible {
+    background: #e5f1fb;
+    outline-color: #173b5d;
+  }
+  @media print {
+    button.copy-code { display: none; }
+    div.sourceCode { border-color: #bfc6cd; }
+  }
+</style>
+<script>
+  (function () {
+    function fallbackCopy(value) {
+      var field = document.createElement("textarea");
+      field.value = value;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.opacity = "0";
+      document.body.appendChild(field);
+      field.focus();
+      field.select();
+      var copied = document.execCommand("copy");
+      field.remove();
+      return copied;
+    }
+
+    async function copyCode(value) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(value);
+          return true;
+        } catch (error) {
+          // A locally opened HTML file may require the older clipboard route.
+        }
+      }
+      return fallbackCopy(value);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("div.sourceCode > pre > code").forEach(function (code) {
+        var wrapper = code.parentElement.parentElement;
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "copy-code";
+        button.textContent = "Copy code";
+        button.setAttribute("aria-label", "Copy this code block");
+        button.addEventListener("click", async function () {
+          var copied = await copyCode(code.textContent);
+          button.textContent = copied ? "Copied!" : "Copy failed";
+          window.setTimeout(function () { button.textContent = "Copy code"; }, 1800);
+        });
+        wrapper.appendChild(button);
+      });
+    });
+  })();
+</script>
